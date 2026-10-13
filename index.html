@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LOYA Casino</title>
+<meta name="description" content="LOYA Casino: cartas, tragaperras, ruleta, máquina de peluches y estantería en 3D. Tu progreso se guarda en tu navegador.">
+<meta name="theme-color" content="#07060b">
+<meta property="og:title" content="LOYA Casino">
+<meta property="og:description" content="Casino 3D con máquina de peluches. Versión de prueba.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎰%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;800&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<canvas id="gl"></canvas>
+<canvas id="bgfx"></canvas>
+<canvas id="fx"></canvas>
+
+<section id="home" class="screen">
+  <div class="home-top"><div id="logo" class="logo" role="button" aria-label="Logo de Loya: toca para iniciar sesión">LOYA</div><div class="sub">CASINO</div></div>
+  <div class="home-bot">
+    <button class="btn big" id="btnPlay">JUGAR</button>
+    <div class="hint">Versión de prueba · tu progreso se guarda solo en este navegador.</div>
+    <div class="hint">Toca el sol dorado o el nombre para entrar con tu usuario y contraseña de administrador.</div>
+  </div>
+</section>
+
+<section id="lobby" class="screen hidden">
+  <div class="top"><div class="brand">LOYA</div><div class="spacer"></div><button id="lobDaily" class="icon" aria-label="Regalo diario">🎁<i class="dot2"></i></button><button id="lobAdmin" class="icon admin-only" aria-label="Panel de administrador">⚙</button><div class="chip"><i class="cd"></i><b class="coins">0</b></div></div>
+  <div class="tiles">
+    <button class="tile" data-go="cards"><span class="ic">🃏</span><span><b>Cartas</b><small>Arrastra tu carta y gana al bot o a un amigo</small></span></button>
+    <button class="tile" data-go="slots"><span class="ic">🎰</span><span><b>Tragaperras</b><small>Tres rodillos 3D y un premio mayor ardiente</small></span></button>
+    <button class="tile" data-go="roulette"><span class="ic">🎡</span><span><b>Ruleta</b><small>Elige color y suerte, y mira girar la rueda</small></span></button>
+    <button class="tile" data-go="claw"><span class="ic">🧸</span><span><b>Peluches</b><small>Atrapa personajes con la garra</small></span></button>
+    <button class="tile" data-go="shelf"><span class="ic">🗄️</span><span><b>Estantería</b><small>Acomoda tu colección y mejórala</small></span></button>
+  </div>
+  <div class="foot"><button class="btn ghost" id="btnLogout">Salir</button></div>
+</section>
+
+<section id="game" class="screen hidden">
+  <div class="top"><button class="icon" id="btnBack" aria-label="Volver">‹</button><div id="gTitle" class="gtitle"></div><div class="spacer"></div><button id="btnSnd" class="icon" aria-label="Sonido">🔊</button><button id="gAdmin" class="icon admin-only" aria-label="Panel de administrador">⚙</button><div class="chip"><i class="cd"></i><b class="coins">0</b></div></div>
+  <div id="gHud" class="hud"></div>
+  <div id="panel" class="panel"></div>
+</section>
+
+<section id="daily" class="screen hidden">
+  <div class="top"><button class="icon" id="dyBack" aria-label="Volver">‹</button><div class="gtitle">Regalo diario</div><div class="spacer"></div><div class="chip"><i class="cd"></i><b class="coins">0</b></div></div>
+  <div id="dyHud" class="hud"></div>
+  <div id="dyCard" class="dycard"><div id="dyPanel"></div></div>
+</section>
+
+<div id="login" class="modal mid hidden"><div class="sheet">
+  <h2>Acceso</h2>
+  <input type="text" id="lgU" placeholder="Usuario" autocomplete="username" autocapitalize="none" autocorrect="off">
+  <input type="password" id="lgP" placeholder="Contraseña" autocomplete="current-password">
+  <div id="lgE" class="err"></div>
+  <div class="btns"><button class="btn ghost" id="lgX">Cancelar</button><button class="btn" id="lgOk">Entrar</button></div>
+</div></div>
+
+<div id="admin" class="modal hidden"><div class="sheet adm">
+  <div class="adm-h"><h2>Panel de administrador</h2><button class="icon" id="admClose" aria-label="Cerrar">✕</button></div>
+  <div class="tabs" id="admTabs"></div>
+  <div id="admBody"></div>
+</div></div>
+
+<div id="coll" class="modal hidden"><div class="sheet adm">
+  <div class="adm-h"><h2>Colección</h2><button class="icon" id="collClose" aria-label="Cerrar">✕</button></div>
+  <div class="btnrow" style="padding:0 16px 6px;align-items:center"><button class="mini" id="collDupes" style="margin-top:0">Vender repetidos</button><span id="collInfo" class="note"></span></div>
+  <div id="collBody"></div>
+</div></div>
+
+<div id="pass" class="modal mid hidden"><div class="sheet">
+  <div class="passbig" id="passT"></div>
+  <div class="err" style="color:var(--mut)" id="passS"></div>
+  <button class="btn big" id="passBtn" style="max-width:none">Continuar</button>
+</div></div>
+
+<div id="win" class="hidden"><div class="winbox"><div class="wt" id="winT">¡GANASTE!</div><canvas id="coinGL" width="260" height="260"></canvas><div class="wa" id="winA">+0</div></div></div>
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
